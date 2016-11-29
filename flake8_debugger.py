@@ -17,14 +17,14 @@ class DebugStatementChecker(object):
         self.filename = (filename == 'stdin' and stdin) or filename
 
     def run(self):
-        try:
-            if self.filename == stdin:
-                noqa = get_noqa_lines(self.filename)
+        if self.filename == stdin:
+            if self.filename.closed:
+                noqa = []
             else:
-                with open(self.filename, 'r') as file_to_check:
-                    noqa = get_noqa_lines(file_to_check.readlines())
-        except IOError:
-            noqa = []
+                noqa = get_noqa_lines(self.filename)
+        else:
+            with open(self.filename, 'r') as file_to_check:
+                noqa = get_noqa_lines(file_to_check.readlines())
 
         errors = check_tree_for_debugger_statements(self.tree, noqa)
 
